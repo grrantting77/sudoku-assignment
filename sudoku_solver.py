@@ -408,9 +408,12 @@ def pl_bc_entails(kb, query, trace=None):
     """
 
     # -----------------------------------------------------
-    # Build lookup structures only once for each KB.
+    # Reuse lookup structures only while the KB's clauses are unchanged.
+    # A snapshot detects additions, retractions, and same-length replacements.
     # -----------------------------------------------------
-    if not hasattr(kb, '_bc_facts'):
+    clause_snapshot = tuple(kb.clauses)
+
+    if getattr(kb, '_bc_clause_snapshot', None) != clause_snapshot:
 
         # Single positive symbols are known facts.
         kb._bc_facts = {
@@ -443,6 +446,8 @@ def pl_bc_entails(kb, query, trace=None):
                 ].append(
                     premises
                 )
+
+        kb._bc_clause_snapshot = clause_snapshot
 
     proven = set(
         kb._bc_facts

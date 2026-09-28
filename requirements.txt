@@ -1,1 +1,5 @@
 streamlit==1.51.0
+networkx>=3.0,<4
+numpy>=1.23,<3
+# Used by the notebook to stop inference experiments at a memory limit.
+psutil>=5.9,<8

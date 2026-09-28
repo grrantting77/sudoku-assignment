@@ -872,6 +872,21 @@ without becoming visually harsh.
 }
 
 
+/* The underline and letter markers also work without color. */
+.sudoku-board td.derived .cell-inner {
+    text-decoration: underline;
+    text-underline-offset: .16em;
+}
+.sudoku-board .cell-role {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    font-size: max(8px, .45em);
+    font-weight: 750;
+    line-height: 1;
+    text-decoration: none;
+}
+
 /* Supporting cell */
 
 .sudoku-board td.source {
@@ -2830,8 +2845,9 @@ def board_html(
 
             label = (
                 f"Row {r}, column {c}: "
-                f"{value if value != '' else 'empty'}"
+                f"{value if value != '' else 'empty'}; {classes[0]}"
             )
+
 
 
             if (
@@ -2859,6 +2875,22 @@ def board_html(
                 label += (
                     f"; eliminate "
                     f"{target_note[1:]}"
+                )
+
+
+            roles = []
+            for highlighted, marker, description in (
+                (source, "S", "supporting cell"),
+                (target, "T", "reasoning target"),
+                (query_target, "Q", "query target"),
+            ):
+                if cell == highlighted:
+                    roles.append(marker)
+                    label += f"; {description}"
+            if roles:
+                display += (
+                    '<span class="cell-role" aria-hidden="true">'
+                    f'{"/".join(roles)}</span>'
                 )
 
 
@@ -2940,7 +2972,7 @@ def board_legend(
 
         (
             "#d9f1e9",
-            "Inferred",
+            "Inferred (underlined)",
         ),
     ]
 
@@ -2950,12 +2982,12 @@ def board_legend(
         entries += [
             (
                 "#cce7f8",
-                "Supporting cell",
+                "Supporting cell (S)",
             ),
 
             (
                 "#fff0c9",
-                "Reasoning target",
+                "Reasoning target (T)",
             ),
         ]
 
@@ -3016,15 +3048,12 @@ def clear_query():
 def change_puzzle():
 
     clear_query()
-
-    st.session_state.pop(
-        "solve_record",
-        None,
-    )
+    clear_solve()
 
 
 def clear_solve():
 
+    st.session_state.pop("solve_error", None)
     st.session_state.pop(
         "solve_record",
         None,
@@ -3462,10 +3491,7 @@ with solve_tab:
                 key="solve_button",
             ):
 
-                st.session_state.pop(
-                    "solve_record",
-                    None,
-                )
+                clear_solve()
 
 
                 try:
@@ -3525,15 +3551,17 @@ with solve_tab:
 
                 except Exception as exc:
 
-                    note(
-                        "The solver could not finish: "
-                        f"{exc}"
+                    st.session_state["solve_error"] = (
+                        "The solver could not finish. No result from this attempt "
+                        f"is available. Details: {exc}"
                     )
 
+                # Rebuild both columns after success or failure; never leave an
+                # earlier grid or elapsed time visible after a failed retry.
+                st.rerun()
 
-                else:
-
-                    st.rerun()
+            if st.session_state.get("solve_error"):
+                st.error(st.session_state["solve_error"])
 
 
             if record:
@@ -3604,7 +3632,7 @@ with solve_tab:
 
                 st.caption(
                     f"Start with {len(givens)} given cells. "
-                    f"Inferred values will appear in teal."
+                    f"Inferred values are teal and underlined."
                 )
 
 
@@ -3801,7 +3829,7 @@ with query_tab:
 
             except Exception as exc:
 
-                note(
+                st.error(
                     "The query could not be completed: "
                     f"{exc}"
                 )
@@ -3882,7 +3910,7 @@ with query_tab:
 
 
         st.caption(
-            f"Highlighted: "
+            f"Q marks the query target: "
             f"row {qr}, column {qc} · "
             f"Original givens"
         )
@@ -4087,8 +4115,8 @@ with tutor_tab:
                 "Visual Reasoning",
 
                 (
-                    "Blue marks the supporting cell; "
-                    "amber marks the current reasoning target."
+                    "S marks the supporting cell; "
+                    "T marks the current reasoning target."
                 ),
             )
 
