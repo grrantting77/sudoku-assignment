@@ -524,6 +524,66 @@ button[data-baseweb="tab"][aria-selected="true"]::after {
 }
 
 
+.key-reasoning-head {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    font-size:
+        1.55rem;
+
+    letter-spacing:
+        -.025em;
+
+    margin:
+        12px
+        0
+        7px;
+}
+
+
+.key-reasoning-head::before {
+    content: "";
+
+    width:
+        4px;
+
+    height:
+        1.45rem;
+
+    flex:
+        0 0 4px;
+
+    border-radius:
+        999px;
+
+    background:
+        var(--teal);
+}
+
+
+.key-reasoning-caption {
+    margin:
+        0
+        0
+        17px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        .94rem;
+
+    line-height:
+        1.6;
+}
+
+
 /* ======================================================
    STREAMLIT CONTAINERS
    ====================================================== */
@@ -589,6 +649,61 @@ button[kind="primary"] {
 button[kind="primary"]:hover {
     background:
         #245577
+        !important;
+}
+
+
+.st-key-next_step button[kind="primary"] {
+    background:
+        #173f5e
+        !important;
+
+    border-color:
+        #173f5e
+        !important;
+
+    box-shadow:
+        0 5px 12px #173f5e24;
+}
+
+
+.st-key-next_step button[kind="primary"]:hover {
+    background:
+        #245b7e
+        !important;
+
+    border-color:
+        #245b7e
+        !important;
+}
+
+
+.st-key-previous_step button {
+    background:
+        transparent
+        !important;
+
+    border-color:
+        #ccdae4
+        !important;
+
+    color:
+        #35556c
+        !important;
+
+    box-shadow:
+        none
+        !important;
+}
+
+
+.st-key-previous_step button:hover {
+    background:
+        #edf4f8
+        !important;
+
+    border-color:
+        #9eb9ca
         !important;
 }
 
@@ -4016,16 +4131,18 @@ with tutor_tab:
 
 
             html(
-                '<h3 class="subhead">'
+                '<h3 class="subhead key-reasoning-head">'
                 'Key Reasoning'
                 '</h3>'
             )
 
 
-            st.caption(
-                "Each row explains a direct premise "
-                "of the final inference. "
-                "× marks a value ruled out."
+            html(
+                '<p class="key-reasoning-caption">'
+                'Each row explains a direct premise '
+                'of the final inference. '
+                '× marks a value ruled out.'
+                '</p>'
             )
 
 
@@ -4152,8 +4269,8 @@ with tutor_tab:
             prev, step_col, nxt = (
                 st.columns(
                     [
-                        1,
-                        1.2,
+                        .9,
+                        .48,
                         1,
                     ]
                 )
@@ -4217,6 +4334,9 @@ with tutor_tab:
 
                     key=
                         "next_step",
+
+                    type=
+                        "primary",
 
                     use_container_width=
                         True,
